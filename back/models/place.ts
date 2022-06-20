@@ -3,48 +3,48 @@ import { dbType } from ".";
 import { sequelize } from "./sequelize";
 import Review from "./review";
 
-class User extends Model {
+class Place extends Model {
     public readonly id!: string;
-    public email!: string;
-    public userName!:string;
-    public password!: string;
+    public placeName!: string;
+    public country!: string;
+    public location!: string;
     public readonly createAt!: Date;
     public readonly updateAt!: Date;
+    
+    public reviews!: Array<string>;
 
-    public addReview!: HasManyAddAssociationMixin<Review, number>;      // review와 관계 형성 때 생성되는 메소드
+    public addReview!: HasManyAddAssociationMixin<Review, number>;
 }
 
-// User 모델 init
-User.init({
+Place.init({
     id: {
         type:DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
     },
-    email: {
+    placeName: {
         type: DataTypes.STRING(45),
         allowNull: false,
         unique: true
     },
-    userName: {
-        type: DataTypes.STRING(20),
-        allowNull: false
+    country: {
+        type: DataTypes.STRING(45),
+        allowNull: false,
     },
-    password: {
+    location: {
         type: DataTypes.STRING(100),
-        allowNull: false
-    },
+        allowNull: false,
+    }
 }, {
     sequelize,
-    modelName: 'User',
-    tableName: 'users',
-    charset: 'utf8', 
+    modelName: 'Place',
+    tableName: 'places',
+    charset: 'utf8',
     collate: 'utf8_general_ci'
 });
 
-// 관계 형성 
 export const associate = (db: dbType) => {
-    db.User.hasMany(db.Review);
+    db.Place.hasMany(db.Review);
 };
 
-export default User;
+export default Place;
