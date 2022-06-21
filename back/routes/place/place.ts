@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { isLoggedIn } from '../middleware';
+import { isLoggedIn } from '../../middlewares/auth';
 import Place from '../../models/place';
 
 const router = express.Router();

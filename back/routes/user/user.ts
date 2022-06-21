@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as passport from 'passport';
 import * as bcrypt from 'bcrypt';
 import User from '../../models/user';
-import { isLoggedIn, isNotLoggedIn } from '../middleware';
+import { isLoggedIn, isNotLoggedIn } from '../../middlewares/auth';
 
 const router = express.Router();
 

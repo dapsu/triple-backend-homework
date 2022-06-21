@@ -1,7 +1,7 @@
 import * as express from 'express';
 import Review from '../../models/review';
 import Place from '../../models/place';
-import { isLoggedIn } from '../middleware';
+import { isLoggedIn } from '../../middlewares/auth';
 
 const router = express.Router();
 
@@ -42,6 +42,5 @@ router.post('/events/:placeId', isLoggedIn, async (req, res, next) => {
         next(err);
     }
 });
-
 
 export default router;

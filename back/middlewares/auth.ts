@@ -1,4 +1,4 @@
-import {Request, Response, NextFunction} from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 // 사용자 인증 여부 파악하는 함수
 const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
