@@ -22,7 +22,8 @@ Point.init({
     },
     points: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     }
 }, {
     sequelize,
