@@ -32,7 +32,6 @@ router.post('/', async (req, res, next) => {
 
         // Point 모델과 연동
         await Point.create({
-            points: 0,
             UserId: newUser!.dataValues.id
         });
 
