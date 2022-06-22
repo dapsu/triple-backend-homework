@@ -1,6 +1,7 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, HasManyAddAssociationMixin, Model } from "sequelize";
 import { dbType } from ".";
 import { sequelize } from "./sequelize";
+import ReviewImage from './reviewImage';
 
 class Review extends Model {
     public readonly id!: string;
@@ -15,8 +16,12 @@ class Review extends Model {
     public PlcaeId!: number;
     
     public dataValues!: {
-        id: Review;
+        id: any,
+        UserId: any,
+        PlaceId: any
     }
+
+    public addReviewImage!: HasManyAddAssociationMixin<ReviewImage, number>;
 }
 
 Review.init({
@@ -47,6 +52,8 @@ Review.init({
 
 export const associate = (db: dbType) => {
     db.Review.belongsTo(db.User);
+    db.Review.belongsTo(db.Place);
+    db.Review.hasMany(db.ReviewImage);
 };
 
 export default Review;

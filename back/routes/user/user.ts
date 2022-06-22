@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as passport from 'passport';
 import * as bcrypt from 'bcrypt';
 import User from '../../models/user';
+import Point from '../../models/point';
 import { isLoggedIn, isNotLoggedIn } from '../../middlewares/auth';
 
 const router = express.Router();
@@ -28,6 +29,13 @@ router.post('/', async (req, res, next) => {
             userName: req.body.userName,
             password: hashedPassword
         });
+
+        // Point 모델과 연동
+        await Point.create({
+            points: 0,
+            UserId: newUser!.dataValues.id
+        });
+
         return res.status(200).json(newUser);
     }
     catch (err) {

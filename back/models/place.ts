@@ -13,6 +13,10 @@ class Place extends Model {
     
     public reviews!: Array<string>;
 
+    public dataValues!: {
+        id: any
+    }
+
     public addReview!: HasManyAddAssociationMixin<Review, number>;
 }
 
