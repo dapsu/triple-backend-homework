@@ -11,6 +11,10 @@ class User extends Model {
     public readonly createAt!: Date;
     public readonly updateAt!: Date;
 
+    public dataValues!: {
+        id: any
+    }
+
     public addReview!: HasManyAddAssociationMixin<Review, number>;      // review와 관계 형성 때 생성되는 메소드
 }
 
@@ -45,6 +49,7 @@ User.init({
 // 관계 형성 
 export const associate = (db: dbType) => {
     db.User.hasMany(db.Review);
+    db.User.hasOne(db.Point);
 };
 
 export default User;
