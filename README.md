@@ -49,20 +49,108 @@
 
 
 ## Run
-추후 작성 예정
 
-## Skill stack / Dependencies
-추후 작성 에정
+#### 1. 환경변수 파일 생성
+
+* DB와 연동되어야 서버 실행이 가능합니다.
+* **.env** 파일 내용
+```
+# ? 부분에 사용하는 DB 정보를 입력합니다.
+DB_USER = ?
+DB_PASSWORD = ?
+DB_DATABSE = ?
+COOKIE_SECRET = ?
+```
+
+#### 2. 서버 실행
+```
+# 작업 경로로 이동
+$ cd /back
+
+# 서버 실행 명령어 실행
+$ npm run start
+
+# 코드 컴파일 및 빌드
+$ npm run build
+```
+
+#### 3. 접속
+```
+http://localhost:3000
+```
+
+
+
+## Skill stack
+* Node.js (v16.13.0)
+* TypeScript (v4.7.3)
+* Express (v4.18.1)
+* MySQL (v8.0.28)
+* Sequelize (v6.20.1)
 
 ---
 
 # 2. DB 설계
-추후 작성 예정
+* REBMS: MySQL
+* DB_NAME: wanted_preonboarding
+* DB_TABLES:
+	1. users
+	2. places
+	3. reviews
+	4. points
+	5. pointlogs
+	6. reviewimages
+	
+## ERD
+![캡처](https://user-images.githubusercontent.com/80298502/175456521-14e80910-cd74-44df-947b-21a71cb1cb0e.JPG)
 
 ---
 
 # 3. API 설계
-추후 작성 예정
+
+## 회원 인증 관련 API
+
+### 회원가입
+* 이메일, 유저 이름, 패스워드 입력 통해 회원가입
+* URL: /api/user/
+* METHOD: POST
+
+### 로그인
+* 이메일, 유저 이름, 패스워드 입력 통해 로그인
+* URL: /api/user/login
+* METHOD: POST
+
+### 로그아웃
+* 세션 삭제 통해 로그아웃
+* URL: /api/user/logout
+* METHOD: POST
+
+## 리뷰 관련 API
+
+### 리뷰 작성
+* request param을 통해 얻은 해당 장소 데이터의 id로 장소 리뷰 작성 
+* URL: /api/review/evnets/:placeId
+* METHOD: POST
+
+### 리뷰 이미지 등록
+* 해당 리뷰에서 사진 등록 시 api 
+* URL: /api/review/img/:reviewId
+* METHOD: POST
+
+### 리뷰 수정
+* 리뷰 내용 수정
+* URL: /api/review/events/:placeId
+* METHOD: PUT
+
+### 리뷰 이미지 삭제
+* 해당 리뷰에서 사진 삭제 
+* URL: /api/review/img/:imageId
+* METHOD: DELETE
+
+### 리뷰 삭제
+* 해당 리뷰 삭제
+* URL: /api/review/events/:reviewId
+* METHOD: DELETE
 
 ---
 
