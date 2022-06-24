@@ -1,9 +1,12 @@
 import * as express from 'express';
+import * as fs from 'fs';
 import Review from '../../models/review';
 import Place from '../../models/place';
 import Point from '../../models/point';
 import PointLog from '../../models/pointLog';
+import ReviewImage from '../../models/reviewImage';
 import { isLoggedIn } from '../../middlewares/auth';
+import { uploadFile } from '../../middlewares/upload';
 
 const router = express.Router();
 
@@ -17,11 +20,61 @@ const actionType = {
 //로그 업데이트 타입
 const updatePointType = {
     create: '리뷰 작성 점수: +1',
+    img: '리뷰 사진 등록 점수: +1',
     getBonus: '특정 장소에 첫 리뷰 작성: +1',
     modifiy: '리뷰 내용 수정: 0',
     delete: '리뷰 삭제: -1',
+    deleteImg: '리뷰 이미지 삭제: -1',
     deleteBonus: '보너스 포인트 삭제: -1'
 }
+
+// 리뷰 이미지 업로드
+router.post('/img/:reviewId', isLoggedIn, uploadFile.single('file'), async (req, res, next) => {
+    try {
+        const user = req.user!;
+        const userId = user.dataValues.id;
+
+        const reviewId = req.params.reviewId;
+        // reviewId가 유효하지 않다면 404 반환
+        if (!reviewId) return res.status(404).end();
+
+        const review = await Review.findOne({
+            where: { id: reviewId },
+            attributes: ['id', 'UserId']
+        });
+        if (review!.dataValues.UserId !== userId) return res.status(403).end();     // 다른 사용자가 작성한 리뷰에 접근하려고 할 때
+        
+        const newImage = await ReviewImage.create({
+            type: req.file!.mimetype,
+            imageName: req.file!.originalname,
+            data: fs.readFileSync(__dirname + '/../../public/images/' + req.file!.filename)    // 해당 경로로부터 파일 불러옴
+        });
+        const reviewImageId = newImage.dataValues.id;
+        await review!.addReviewImage(reviewImageId);
+
+        // 사진 등록 시 포인트 적립
+        const Images = await ReviewImage.findAll({
+            where: { ReviewId: reviewId }
+        });
+        if (Images.length === 1) {
+            await Point.increment({ points: 1 }, { where: { UserId: userId } });
+            // 포인트 적립 로그 생성
+            const newImageLog = await PointLog.create({
+                action: actionType.ADD,
+                reviewId: reviewId,
+                updatePoint: updatePointType.img,
+            });
+            const imageLogId = newImageLog.dataValues.id;
+            await user.addPointLog(imageLogId);
+        }
+        
+        return res.send('사진 등록 완료!');
+    }
+    catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
 
 // 리뷰 작성
 router.post('/events/:placeId', isLoggedIn, async (req, res, next) => {
@@ -133,6 +186,46 @@ router.put('/events/:reviewId', isLoggedIn, async (req, res, next) => {
     await user.addPointLog(pointLogId);
 });
 
+// 리뷰 이미지 삭제
+router.delete('/img/:imageId', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = req.user!;
+        const userId = user.dataValues.id;
+
+        const imageId = req.params.imageId;
+        const image = await ReviewImage.findOne({ where: { id: imageId }});
+        const reviewId = image!.dataValues.ReviewId;
+
+        await ReviewImage.destroy({ where: { id: imageId }});
+
+        const images = await ReviewImage.findAll({ where: {ReviewId: reviewId } });
+        if (images) {
+            const newPointLog = await PointLog.create({
+                action: actionType.MOD,
+                reviewId: reviewId,
+                updatePoint: updatePointType.modifiy,
+            });
+            const pointLogId = newPointLog.dataValues.id;
+            await user.addPointLog(pointLogId);
+        }
+        else {
+            const newPointLog = await PointLog.create({
+                action: actionType.DELETE,
+                reviewId: reviewId,
+                updatePoint: updatePointType.deleteImg,
+            });
+            const pointLogId = newPointLog.dataValues.id;
+            await user.addPointLog(pointLogId);
+
+            await Point.decrement({ points: 1 }, { where: { UserId: userId } });
+        }
+    }
+    catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
+
 // 리뷰 삭제
 router.delete('/events/:reviewId', isLoggedIn, async (req, res) => {
     const reviewId = req.params.reviewId;
@@ -191,9 +284,9 @@ router.delete('/events/:reviewId', isLoggedIn, async (req, res) => {
 
     // 리뷰 삭제
     await Review.destroy({ where: { id: reviewId, UserId: userId } })
-    .then(() => {
-        return res.status(204).end();
-    });
+        .then(() => {
+            return res.status(204).end();
+        });
 });
 
 export default router;
